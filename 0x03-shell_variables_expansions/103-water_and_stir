@@ -1,2 +1,2 @@
 #!/bin/bash
-result=$((water#WATER+stir#STIR)) | echo "$bestchol#result"
+echo "$((WATER+STIR))"
