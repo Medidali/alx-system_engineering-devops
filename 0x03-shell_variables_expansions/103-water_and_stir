@@ -1,2 +1,2 @@
 #!/bin/bash
-echo "$(bestchol#resultat)=$((water#WATER+stir#STIR))"
+result=$((water#WATER+stir#STIR)) | echo "$bestchol#result"
