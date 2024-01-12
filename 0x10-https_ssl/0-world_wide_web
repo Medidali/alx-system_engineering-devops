@@ -1,26 +1,13 @@
 #!/usr/bin/env bash
-# Bash scrpt that will display information about subdomains.
-function domain_check {
-	domain_names=("www" "lb-01" "web-01" "web-02")
+#displays information about subdomains
 
-	for i in "${domain_names[@]}";
-	do
-		dig "${i}"."$1" | grep -A1 'ANSWER SECTION:' | \
-		awk 'FNR == 2 {printf "The subdomain %s is a %s record and points to %s\n", var, $4, $5}' var="$i"
-	done
+display_info () {
+    #address=$(dig "$2"."$1" | grep -A1 'ANSWER SECTION:' | tr '\t' '\n' | tail -1)
+    #type=$(dig "$2"."$1" | grep -A1 'ANSWER SECTION:' | tr '\t' '\n' | tail -2 | head -1)
+    dig "$2"."$1" | awk '/ANSWER SECTION:/{getline; printf "The subdomain %s is a %s record and points to %s\n", var, $4, $5}' var="$2"
 }
 
-function subdomain_check {
-	dig "${2}"."$1" | grep -A1 'ANSWER SECTION:' | \
-	awk 'FNR == 2 {printf "The subdomain %s is a %s record and points to %s\n", var, $4, $5}' var="$2"
-}
-
-if [ $# -lt 1 ]
-then
-	echo "*** Provide domain name ***"
-elif [ $# -eq 1 ]
-then
-	domain_check "$1";
-else
-	subdomain_check "$1" "$2";
-fi
+display_info "$1" "www"
+display_info "$1" "lb-01"
+display_info "$1" "web-01"
+display_info "$1" "web-02"
