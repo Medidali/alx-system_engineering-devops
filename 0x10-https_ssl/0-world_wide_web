@@ -1,13 +1,38 @@
 #!/usr/bin/env bash
-#displays information about subdomains
 
-display_info () {
-    #address=$(dig "$2"."$1" | grep -A1 'ANSWER SECTION:' | tr '\t' '\n' | tail -1)
-    #type=$(dig "$2"."$1" | grep -A1 'ANSWER SECTION:' | tr '\t' '\n' | tail -2 | head -1)
-    dig "$2"."$1" | awk '/ANSWER SECTION:/{getline; printf "The subdomain %s is a %s record and points to %s\n", var, $4, $5}' var="$2"
+function display_info {
+    local subdomain="$1"
+    local domain="$2"
+
+    local result=$(dig +short "${subdomain}"."${domain}")
+
+    if [ -n "$result" ]; then
+        local record_type=$(dig "${subdomain}"."${domain}" | grep -A1 'ANSWER SECTION:' | awk 'FNR == 2 {print $4}')
+        local destination=$(dig +short "${subdomain}"."${domain}")
+
+        echo "The subdomain ${subdomain} is a ${record_type} record and points to ${destination}"
+    else
+        echo "Unable to retrieve information for the subdomain ${subdomain}"
+    fi
 }
 
-display_info "$1" "www"
-display_info "$1" "lb-01"
-display_info "$1" "web-01"
-display_info "$1" "web-02"
+function domain_check {
+    local domain="$1"
+    local subdomains=("www" "lb-01" "web-01" "web-02")
+
+    for subdomain in "${subdomains[@]}"; do
+        display_info "$subdomain" "$domain"
+    done
+}
+
+if [ $# -lt 1 ]; then
+    echo "*** Provide a domain name ***"
+    exit 1
+elif [ $# -eq 1 ]; then
+    domain_check "$1"
+elif [ $# -eq 2 ]; then
+    display_info "$2" "$1"
+else
+    echo "*** Too many arguments ***"
+    exit 1
+fi
